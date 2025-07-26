@@ -25,9 +25,9 @@ Usage:
     python duplicate_comment_detection.py [--comment_source_table TABLE] [--db DATABASE] [--output_table OUTPUT]
 """
 
-from trottertools.WriteOnceDict import WriteOnceDict
-from trottertools.myDBTable import myDBTable
-from trottertools.mySQLh import mySQLh
+from .trottertools.WriteOnceDict import WriteOnceDict
+from .trottertools.myDBTable import myDBTable
+from .trottertools.mySQLh import mySQLh
 import os
 import json
 import sys
@@ -37,7 +37,6 @@ import difflib
 from difflib import unified_diff
 from sqlalchemy import select
 from sqlalchemy import text
-import MySQLdb
 from difflib import HtmlDiff
 import argparse
 
@@ -58,8 +57,8 @@ def compare_strings(str1, str2):
         str2 (str): The second string to compare.
 
     Returns:
-        float: A numerical score between 0 and 1 representing the similarity between 
-              the two strings. A score of 1.0 indicates identical strings, while 0.0 
+        float: A numerical score between 0 and 1 representing the similarity between
+              the two strings. A score of 1.0 indicates identical strings, while 0.0
               indicates completely different strings.
     """
     sequence_matcher = difflib.SequenceMatcher(None, str1, str2)
@@ -68,20 +67,32 @@ def compare_strings(str1, str2):
 
 if __name__ == "__main__":
     # Parse command line arguments for configurable table names and database
-    parser = argparse.ArgumentParser(description='Process comments.')
-    parser.add_argument('--comment_source_table', type=str, default='comment', help='Name of the comment table')
-    parser.add_argument('--db', type=str, default='mirrulation', help='Name of the database')   
-    parser.add_argument('--output_table', type=str, default='mirrulation', help='Name of the output table') 
+    parser = argparse.ArgumentParser(description="Process comments.")
+    parser.add_argument(
+        "--comment_source_table",
+        type=str,
+        default="comment",
+        help="Name of the comment table",
+    )
+    parser.add_argument(
+        "--db", type=str, default="mirrulation", help="Name of the database"
+    )
+    parser.add_argument(
+        "--output_table",
+        type=str,
+        default="mirrulation",
+        help="Name of the output table",
+    )
     args = parser.parse_args()
-    
+
     # Initialize database connections and table objects
     comment_table = args.comment_source_table
     m_db = args.db
     commentDBT = myDBTable.myDBTable(m_db, comment_table)
 
-    unique_comment_DBT = myDBTable.myDBTable(m_db,'uniquecomment')
-    cluster_DBT = myDBTable.myDBTable(m_db,'comment_clusters')
-    unique_to_comment_DBT = myDBTable.myDBTable(m_db,'uniquecomment_to_comment')
+    unique_comment_DBT = myDBTable.myDBTable(m_db, "uniquecomment")
+    cluster_DBT = myDBTable.myDBTable(m_db, "comment_clusters")
+    unique_to_comment_DBT = myDBTable.myDBTable(m_db, "uniquecomment_to_comment")
 
     # Initialize WriteOnceDict for storing SQL queries
     sql_dict = WriteOnceDict.WriteOnceDict()
@@ -89,30 +100,32 @@ if __name__ == "__main__":
     # Load all unique comments from the database
     all_unique_comments = []
     is_first_run = True
-    result = SQLh._conn.execute(f"SELECT * FROM {unique_comment_DBT}")
+    result = mySQLh._conn.execute(f"SELECT * FROM {unique_comment_DBT}")
     for unique_comment_row in result:
         all_unique_comments.append(unique_comment_row)
-        
+
     # Set similarity threshold - comments with similarity score above this are considered duplicates
-    threshold = .85
+    threshold = 0.85
 
     # Track processed comments to avoid duplicate comparisons
     list_of_done = []
 
     # Main comparison loop - compare each comment with every other comment
-    outer_i = 0        
+    outer_i = 0
     for outside_row in all_unique_comments:
         outer_i = outer_i + 1
         print(f"\t\t\t\t\tLooping over outer: {outer_i}")
         inner_j = 0
-        for inside_row in all_unique_comments: 
+        for inside_row in all_unique_comments:
             inner_j = inner_j + 1
             # Calculate similarity score between comments
-            score = compare_strings(outside_row.simplified_comment_text,inside_row.simplified_comment_text)
-            score = round(score,4)
-            
+            score = compare_strings(
+                outside_row.simplified_comment_text, inside_row.simplified_comment_text
+            )
+            score = round(score, 4)
+
             # If similarity exceeds threshold, record the relationship
-            if(score > threshold):
+            if score > threshold:
                 o_id = outside_row.id
                 i_id = inside_row.id
                 if i_id in list_of_done:
@@ -124,7 +137,7 @@ if __name__ == "__main__":
                     print(outside_row.simplified_comment_text[:70])
                     print(inside_row.simplified_comment_text[:70])
                     print(f"Score: {score}")
-                    if (o_id != i_id):
+                    if o_id != i_id:
                         # Store the relationship in the clusters table
                         # Note: diff_text calculation is commented out for performance
                         sql_dict[matching_string] = f"""
@@ -137,7 +150,7 @@ VALUES ('{o_id}', '{i_id}', '{score}', NULL
                         print("Everything always matches itself")
 
         # Execute stored SQL queries after each outer loop iteration
-        SQLh.runQuerys(sql_dict,is_just_print)
+        mySQLh.runQuerys(sql_dict, is_just_print)
         sql_dict = WriteOnceDict.WriteOnceDict()
 
         # Mark current comment as processed
