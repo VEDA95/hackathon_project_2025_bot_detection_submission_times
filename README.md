@@ -11,5 +11,7 @@ statement this repository focuses on detecting fraudulent bot comments for rule 
 - Stefan Netterfield
 
 To run after pip install -r requirements.txt run marimo edit notebook.py
-Before pip install you may want to create a virtual environment with python3 -m venv <name of venv>, activeate with 'source <name of venv>/bin/activate' and deactivate with deactivate
+Before pip install you may want to create a virtual environment with python3 -m venv <name of venv>, activate with 'source <name of venv>/bin/activate' and deactivate with deactivate
+
+Update DATA_PATH and path_template in data.py 
 
