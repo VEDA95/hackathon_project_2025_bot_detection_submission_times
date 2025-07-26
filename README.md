@@ -10,7 +10,7 @@ statement this repository focuses on detecting fraudulent bot comments for rule 
 - Kristijan Armeni
 - Stefan Netterfield
 
-Before pip install you may want to create a virtual environment with python3 -m venv <name of venv>, activate with 'source <name of venv>/bin/activate' and deactivate with deactivate
+Before pip install you may want to create a virtual environment with python3 -m venv <name of venv>; to activate, in a terminal run 'source <name of venv>/bin/activate', to deactivate, run 'deactivate'
 
 To run after pip install -r requirements.txt run marimo edit notebook.py  
 
