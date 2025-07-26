@@ -3,7 +3,7 @@ from rich.console import Console
 import json
 import polars as pl
 from glob import glob
-DATA_PATH = '/users/kriarm/data/mirrulations/specific/DEA-2016-0015/raw-data/comments'
+DATA_PATH = '/data/mirrulations/specific/DEA-2016-0015/raw-data/comments'
 comment_id = 'DEA-2016-0015-12614.json'
 
 
