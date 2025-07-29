@@ -5,7 +5,7 @@ statement this repository focuses on detecting fraudulent bot comments for rule 
 
 **Contributors Of This Problem Statement**:
 
-- Anshu Sharma
+- Anshu Sharma (anshu.g.sharma@gmail.com) (https://www.linkedin.com/in/anshugsharma/)
 - Dean Eby
 - Kristijan Armeni
 - Stefan Netterfield
