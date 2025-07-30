@@ -20,6 +20,8 @@ def load_data_json_attributes(json_fname: str) -> dict:
 
 
 def fetch_comments_df(docket_id: str):
+    """Load comments json and populate a polars data frame"""
+
     comment_path = f"specific/{docket_id}/raw-data/comments"
     full_path = Path(MIRRULATIONS_FOLDER, comment_path)
 
