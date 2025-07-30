@@ -6,7 +6,7 @@ This is the repository for the Civic Tech DC Hackathon 2025. The problem stateme
 
 - Anshu Sharma (anshu.g.sharma@gmail.com) (https://www.linkedin.com/in/anshugsharma/)
 - Dean Eby
-- Kristijan Armeni
+- [Kristijan Armeni](https://github.com/kristijanarmeni), https://www.linkedin.com/in/kristijanarmeni
 - Stefan Netterfield
 
 Before pip install you may want to create a virtual environment with `python3 -m venv <name of venv>`; to activate, in a terminal run `source <name of venv>/bin/activate`, to deactivate, run `deactivate`.
