@@ -11,16 +11,15 @@ MIRRULATIONS_FOLDER = dotenv_values()["MIRRULATIONS_FOLDER"]
 console = Console()
 
 
-def load_data_json_attributes(json_fname:str) -> dict:
+def load_data_json_attributes(json_fname: str) -> dict:
     """Load json and grab 'attributes' field"""
     with open(json_fname) as fh:
-        d = json.load(fh)['data']['attributes']
+        d = json.load(fh)["data"]["attributes"]
 
     return d
 
 
-def fetch_comments_df(docket_id:str):
-
+def fetch_comments_df(docket_id: str):
     comment_path = f"specific/{docket_id}/raw-data/comments"
     full_path = Path(MIRRULATIONS_FOLDER, comment_path)
 
@@ -39,7 +38,7 @@ def fetch_comments_df(docket_id:str):
 
     total_files = len(all_json)
     processed_files = len(data_json)
-    
+
     console.print(f"Processed {processed_files}/{total_files} comments. Skipped 0!")
     if skipped_count > 0:
         console.print(f"Skipped {skipped_count} comments due to errors")
@@ -52,15 +51,17 @@ def fetch_comments_df(docket_id:str):
         df = pl.DataFrame(data_json, infer_schema_length=None)
         # Drop columns that are entirely null
         cols_to_keep = [col for col in df.columns if not df[col].is_null().all()]
-        
+
     except pl.ComputeError as e:
         print(f"Schema error: {e}")
         print("Attempting to normalize data types...")
-        
+
         # Normalize all values to strings to handle mixed types
         normalized_data = []
         for record in data_json:
-            normalized_record = {k: str(v) if v is not None else None for k, v in record.items()}
+            normalized_record = {
+                k: str(v) if v is not None else None for k, v in record.items()
+            }
             normalized_data.append(normalized_record)
 
         df = pl.DataFrame(normalized_data)
@@ -68,30 +69,33 @@ def fetch_comments_df(docket_id:str):
         cols_to_keep = [col for col in df.columns if not df[col].is_null().all()]
 
     TIME_COLUMNS = ["modifyDate", "receiveDate", "postedDate"]
-    
+
     # Cast time columns to datetime if they exist in the dataframe
     existing_time_cols = [col for col in TIME_COLUMNS if col in df.columns]
     df = df.select(cols_to_keep)
-    
+
     for col in existing_time_cols:
         df = df.with_columns(pl.col(col).str.to_datetime(format=None, strict=False))
-    
+
     # Check if comment column exists before processing duplicates
     if "comment" in df.columns:
         # Find duplicate comments
-        df = df.with_columns(
-            pl.col("comment").is_duplicated().alias("is_duplicate")
-        )
-        
+        df = df.with_columns(pl.col("comment").is_duplicated().alias("is_duplicate"))
+
         # Create SHA256 hash of comments for unique identifier
         df = df.with_columns(
             pl.col("comment")
-            .map_elements(lambda x: hashlib.sha256(str(x).encode()).hexdigest() if x is not None else None, return_dtype=pl.String)
+            .map_elements(
+                lambda x: hashlib.sha256(str(x).encode()).hexdigest()
+                if x is not None
+                else None,
+                return_dtype=pl.String,
+            )
             .alias("commentID")
         )
-    
+
     return df
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     df = fetch_comments_df(docket_id="DEA-2016-0015")
