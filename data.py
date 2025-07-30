@@ -23,6 +23,7 @@ def fetch_comments_df(docket_id: str):
     comment_path = f"specific/{docket_id}/raw-data/comments"
     full_path = Path(MIRRULATIONS_FOLDER, comment_path)
 
+    # list all .json files in docket folder
     all_json = glob(str(Path(full_path, "*.json")))
 
     data_json = []
@@ -95,7 +96,3 @@ def fetch_comments_df(docket_id: str):
         )
 
     return df
-
-
-if __name__ == "__main__":
-    df = fetch_comments_df(docket_id="DEA-2016-0015")
